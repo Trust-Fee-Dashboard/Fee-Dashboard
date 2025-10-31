@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeeFlow Dashboard</title>
+<script src="https://cdn.plot.ly/plotly-2.34.0.min.js"></script>
+
+<style>
+*{transition:0.3s}
+body{font-family:'Segoe UI',sans-serif;margin:0;padding:20px}
+.light{background:#f9fafb;color:#111}
+.dark{background:#0f172a;color:#e2e8f0}
+header{font-size:1.6rem;font-weight:700;margin-bottom:15px;color:#2563eb}
+button{padding:8px 15px;border-radius:6px;border:none;cursor:pointer;font-weight:600}
+.btn-dark{background:#000;color:#fff}
+.btn-light{background:#fff;border:1px solid #000}
+#upload-section{margin-bottom:20px;display:none}
+input[type="file"]{padding:10px;border:1px solid #2563eb;border-radius:6px;cursor:pointer}
+.cards{display:flex;gap:20px;margin-bottom:20px;flex-wrap:wrap}
+.card{flex:1;min-width:220px;background:#fff;margin:2px;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+.dark .card{background:#1e293b;color:#fff}
+.card h3{margin:0 0 8px;font-size:0.9rem;color:#64748b;font-weight:700}
+.dark .card h3{color:#cbd5e1}
+.card p{margin:0;font-size:1.4rem;font-weight:700}
+#table-container{overflow-x:auto;margin-top:15px}
+table{width:100%;border-collapse:collapse}
+thead{background:#2563eb;color:white}
+th,td{padding:10px;border-bottom:1px solid #e5e7eb}
+.dark th{background:#334155}
+.dark tr{color:#e2e8f0}
+tbody tr:hover{background:#f3f4f6}
+.dark tbody tr:hover{background:#1e293b}
+</style>
+</head>
+
+<body class="light">
+<header>FeeFlow Dashboard</header>
+
+<!-- Theme Toggle -->
+<button id="toggleTheme">Dark Mode</button>
+
+<!-- Admin Upload -->
+<div id="upload-section">
+  <input type="file" id="fileInput" accept=".json">
+</div>
+
+<div id="dashboard" style="display:none;">
+  <div class="cards" id="summaryCards"></div>
+  <div id="charts"></div>
+  <div id="table-container">
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>Sr</th><th>Institute</th><th>Name</th><th>Status</th><th>Total Fee</th><th>Discount</th><th>Receivable</th><th>Pending</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const adminKey = "786";
+const isAdmin = new URLSearchParams(location.search).get("admin") === adminKey;
+
+if(isAdmin){document.getElementById("upload-section").style.display="block";}
+
+if(!isAdmin){
+ fetch("data.json")
+  .then(r=>r.json())
+  .then(d=>buildDashboard(d))
+  .catch(()=>console.warn("Add data.json file!"));
+}
+
+document.getElementById("fileInput")?.addEventListener("change",e=>{
+ let f=e.target.files[0];
+ let r=new FileReader();
+ r.onload=x=>buildDashboard(JSON.parse(x.target.result));
+ r.readAsText(f);
+});
+
+function buildDashboard(data){
+ document.getElementById("dashboard").style.display="block";
+ const parse=n=>Number((n+"").replace(/,/g,""))||0;
+ const total=data.reduce((a,b)=>a+parse(b["Total RECEIVEDABLE FEE"]),0);
+ const rec=data.reduce((a,b)=>a+parse(b["Received Fee"]),0);
+ const dis=data.reduce((a,b)=>a+parse(b["Total discount"]),0);
+
+ document.getElementById("summaryCards").innerHTML=`
+ <div class='card'><h3>Total Receivable</h3><p>PKR ${total.toLocaleString()}</p></div>
+ <div class='card'><h3>Total Received</h3><p>PKR ${rec.toLocaleString()}</p></div>
+ <div class='card'><h3>Total Discount</h3><p>PKR ${dis.toLocaleString()}</p></div>
+ `;
+
+ let tbody=document.querySelector("tbody");
+ tbody.innerHTML="";
+ data.forEach(d=>{
+  tbody.innerHTML+=`
+   <tr>
+   <td>${d["Sr no"]||""}</td>
+   <td>${d.institute||""}</td>
+   <td>${d.NAME||""}</td>
+   <td>${d.Status||""}</td>
+   <td>${d["Total fees (PKR)"]||""}</td>
+   <td>${d["Total discount"]||""}</td>
+   <td>${d["Total RECEIVEDABLE FEE"]||""}</td>
+   <td>${d.Pending||""}</td>
+   </tr>`;
+ });
+}
+
+// Theme switch
+let theme="light";
+document.getElementById("toggleTheme").onclick=()=>{
+ theme=theme==="light"?"dark":"light";
+ document.body.className=theme;
+ document.getElementById("toggleTheme").innerText =
+ theme==="light"?"Dark Mode":"Light Mode";
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+[
+  {
+    "Sr no": 1,
+    "institute": "ABC School",
+    "NAME": "Ali",
+    "Status": "Employee",
+    "Total fees (PKR)": "20000",
+    "Total discount": "2000",
+    "Total RECEIVEDABLE FEE": "18000",
+    "Received Fee": "15000",
+    "Pending": "3000"
+  },
+  {
+    "Sr no": 2,
+    "institute": "ABC School",
+    "NAME": "Sara",
+    "Status": "Non-Employee",
+    "Total fees (PKR)": "25000",
+    "Total discount": "0",
+    "Total RECEIVEDABLE FEE": "25000",
+    "Received Fee": "20000",
+    "Pending": "5000"
+  }
+]
